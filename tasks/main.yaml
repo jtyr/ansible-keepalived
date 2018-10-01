@@ -1,0 +1,58 @@
+---
+
+- name: Test distribution
+  assert:
+    that: >
+      ansible_os_family == 'RedHat' or
+      ansible_os_family == 'Debian'
+
+- name: Install Keepalived package
+  package:
+    name: "{{ keepalived_pkg }}"
+  notify:
+    - Restart Keepalived service
+  tags:
+    - keepalived_pkg
+
+- name: Configure Keepalived Sysconfig
+  template:
+    src: sysconfig.j2
+    dest: "{{ keepalived_sysconfig_path }}"
+  when: >
+    ansible_os_family == 'RedHat'
+  notify: Restart Keepalived service
+  tags:
+    - keepalived_config
+
+- name: Configure Keepalived default file
+  template:
+    src: default.j2
+    dest: "{{ keepalived_default_path }}"
+  when: >
+    ansible_os_family == 'Debian'
+  notify: Restart Keepalived service
+  tags:
+    - keepalived_config
+
+- name: Configure Keepalived
+  template:
+    src: keepalived.conf.j2
+    dest: "{{ keepalived_config_path }}"
+  notify: Reload Keepalived service
+  tags:
+    - keepalived_config
+
+- name: Enable Keepalived service
+  service:
+    name: "{{ keepalived_service }}"
+    enabled: yes
+  tags:
+    - keepalived_service
+
+- name: Start Keepalived service
+  service:
+    name: "{{ keepalived_service }}"
+    state: started
+  register: keepalived_service_started
+  tags:
+    - keepalived_service

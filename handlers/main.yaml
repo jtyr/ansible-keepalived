@@ -1,0 +1,23 @@
+---
+
+- name: Restart Keepalived service
+  service:
+    name: "{{ keepalived_service }}"
+    state: restarted
+  register: keepalived_service_restarted
+  when: >
+    keepalived_service_started is not defined or
+    not keepalived_service_started.changed
+
+- name: Reload Keepalived service
+  service:
+    name: "{{ keepalived_service }}"
+    state: reloaded
+  when: >
+    (
+      keepalived_service_started is not defined or
+      not keepalived_service_started.changed
+    ) and (
+      keepalived_service_restarted is not defined or
+      not keepalived_service_restarted.changed
+    )

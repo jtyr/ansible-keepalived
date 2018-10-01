@@ -1,0 +1,49 @@
+---
+
+# Package to be installed (explicite version can be specified here)
+keepalived_pkg: keepalived
+
+# Service name
+keepalived_service: keepalived
+
+# Path to the keepalived config file
+keepalived_config_path: /etc/keepalived/keepalived.conf
+
+
+# Default config
+keepalived_config__default:
+  - global_defs: []
+
+# Custom config
+keepalived_config__custom: []
+
+# Final config
+keepalived_config: "{{
+  keepalived_config__default +
+  keepalived_config__custom }}"
+
+
+# Sysconfig path
+keepalived_sysconfig_path: /etc/sysconfig/{{ keepalived_service }}
+
+# Default value of the sysconfig options
+keepalived_sysconfig_options: "-D"
+
+# Default sysconfig options
+keepalived_sysconfig__default:
+  keepalived_options: "{{ keepalived_sysconfig_options }}"
+
+# Custom sysconfig options
+keepalived_sysconfig__custom: {}
+
+# Default sysconfig content (see README for examples)
+keepalived_sysconfig: "{{
+  keepalived_sysconfig__default | combine(
+  keepalived_sysconfig__custom) }}"
+
+
+# Default path
+keepalived_default_path: /etc/default/{{ keepalived_service }}
+
+# Default content (see README for examples)
+keepalived_default: {}
