@@ -29,15 +29,19 @@ Examples
     # Keep global_defs empty and just add vrrp_instance
     keepalived_config__custom:
       - vrrp_instance test:
+          # All nodes can be MASTER, priority will decide which node will get the floating IP
           - state MASTER
+          # Use eth1 for the floating IP
           - interface eth1
+          # ID used across all the nodes to identify the same vrrp_instance
           - virtual_router_id 123
+          # Set priority based on the last octet of the IP on eth1
           - priority {{ 255 - ansible_eth1.ipv4.address | regex_replace('^.*\.') | int }}
+          # Publish changes every second
           - advert_int 1
           - virtual_ipaddress:
+              # Floating IP
               - 192.168.101.200/24
-    # Disable detailed logging in the sysconfig file
-    keepalived_sysconfig_options: ""
   roles:
     - keepalived
 
@@ -46,11 +50,20 @@ Examples
   vars:
     keepalived_config:
       - global_defs:
+          # Send e-mail when something happens
           - notification_email:
               - root@mydomain.com
           - notification_email_from host1@example.com
           - smtp_server localhost
           - smtp_connect_timeout 30
+      # Check if TCP port 80 is up
+      - vrrp_script chk_http:
+          - script "netstat -ntl | grep :80"
+          - interval 2
+          - timeout 1
+          - rise 3
+          - fall 3
+          - init_fail
       - vrrp_instance test:
           - state MASTER
           - interface eth1
@@ -59,6 +72,11 @@ Examples
           - advert_int 1
           - virtual_ipaddress:
               - 192.168.101.200/24
+          # Use the check above
+          - track_script:
+              - chk_http
+    # Disable detailed logging in the sysconfig file
+    keepalived_sysconfig_options: ""
   roles:
     - keepalived
 ```
