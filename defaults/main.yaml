@@ -45,5 +45,17 @@ keepalived_sysconfig: "{{
 # Default path
 keepalived_default_path: /etc/default/{{ keepalived_service }}
 
-# Default content (see README for examples)
-keepalived_default: {}
+# Default value of the default options
+keepalived_default_options: ""
+
+# Default default options
+keepalived_default__default:
+  daemon_args: "{{ keepalived_default_options }}"
+
+# Custom default options
+keepalived_default__custom: {}
+
+# Default default content (see README for examples)
+keepalived_default: "{{
+  keepalived_default__default | combine(
+  keepalived_default__custom) }}"

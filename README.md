@@ -75,8 +75,10 @@ Examples
           # Use the check above
           - track_script:
               - chk_http
-    # Disable detailed logging in the sysconfig file
+    # Disable detailed logging in the sysconfig file (RedHat-based distros only)
     keepalived_sysconfig_options: ""
+    # Enable detailed logging in the default file (Debian-based distros only)
+    keepalived_default_options: "-D"
   roles:
     - keepalived
 ```
@@ -133,8 +135,20 @@ keepalived_sysconfig: "{{
 # Default path
 keepalived_default_path: /etc/default/{{ keepalived_service }}
 
-# Default content (see README for examples)
-keepalived_default: {}
+# Default value of the default options
+keepalived_default_options: ""
+
+# Default default options
+keepalived_default__default:
+  daemon_args: "{{ keepalived_default_options }}"
+
+# Custom default options
+keepalived_default__custom: {}
+
+# Default default content (see README for examples)
+keepalived_default: "{{
+  keepalived_default__default | combine(
+  keepalived_default__custom) }}"
 ```
 
 
